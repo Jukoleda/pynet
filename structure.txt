@@ -1,0 +1,26 @@
+core/
+│
+├── tensor.py
+├── parameter.py
+├── module.py
+│
+├── autograd/
+│   ├── operation.py
+│   ├── add.py
+│   ├── multiply.py
+│   ├── matmul.py
+│   ├── relu.py
+│   └── ...
+│
+├── nn/
+│   ├── linear.py
+│   ├── sequential.py
+│   └── embedding.py
+│
+├── optim/
+│   ├── optimizer.py
+│   └── sgd.py
+│
+└── losses/
+    ├── mse.py
+    └── cross_entropy.py
