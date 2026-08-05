@@ -1,4 +1,3 @@
-from autograd.add import Add
 
 class Tensor:
 
@@ -13,6 +12,7 @@ class Tensor:
         self.requires_grad = True
 
     def __add__(self, other):
+        from autograd.add import Add
         return Add.forward(self, other)
 
     def compute_shape(self, data):

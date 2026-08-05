@@ -1,5 +1,5 @@
-from tokenizer import Tokenizer
-from nn.embedding import Embedding
+# from tokenizer import Tokenizer
+# from nn.embedding import Embedding
 
 # with open("dataset.txt", "r", encoding="utf-8") as f:
 #     text = f.read()
@@ -53,8 +53,25 @@ from nn.embedding import Embedding
 # print(brain.predict(10))
 
 
-from nn.sequential import Sequential
+# from nn.sequential import Sequential
 
-module = Sequential([4,5,6,4])
+# module = Sequential([4,5,6,4])
 
-print(module.forward([0,0,1,1]))
+# print(module.forward([0,0,1,1]))
+
+
+
+from core.tensor import Tensor
+from autograd.add import Add
+from autograd.multiply import Multiply
+from autograd.engine import AutogradEngine
+
+a = Tensor([1, 2, 3])
+b = Tensor([4, 5, 6])
+
+c = Add().forward(a, b)
+
+d = Multiply().forward(c, b)
+
+AutogradEngine().print_graph(d)
+

@@ -4,6 +4,4 @@ def dot(vector, row):
     for x,w in zip(vector, row):
         value += x * w
     return value
-
-def add(a, b):
     

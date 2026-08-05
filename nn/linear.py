@@ -1,6 +1,6 @@
 import random
 
-from linalg.vector import dot
+from legacy.linalg.vector import dot
 
 from core.module import Module
 from core.parameter import Parameter
