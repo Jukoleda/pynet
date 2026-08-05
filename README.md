@@ -8,6 +8,7 @@ understand *how* frameworks like PyTorch actually work by rebuilding one piece b
 
 > **Status: work in progress.** The autograd graph is built correctly during the forward pass;
 > the backward pass is the feature currently under construction.
+> See the [changelog](CHANGELOG.md) for what has landed so far.
 
 ## Requirements
 
@@ -35,21 +36,26 @@ b = Tensor([4, 5, 6])
 c = Add().forward(a, b)        # [5, 7, 9]
 d = Multiply().forward(c, b)   # [20, 35, 54]
 
-AutogradEngine().print_graph(d)
+AutogradEngine().print_graph(d, show_data=True)
 ```
 
 Output:
 
 ```
-└── Tensor <- Multiply
-    ├── Tensor <- Add
-    │   ├── Tensor
-    │   └── Tensor
-    └── Tensor
+└── Tensor#3 shape=(3,) data=[20, 35, 54] <- Multiply
+    ├── Tensor#2 shape=(3,) data=[5, 7, 9] <- Add
+    │   ├── Tensor#0 shape=(3,) data=[1, 2, 3]
+    │   └── Tensor#1 shape=(3,) data=[4, 5, 6]
+    └── Tensor#1 shape=(3,) data=[4, 5, 6]
 ```
 
 Each result tensor remembers the operation that produced it (`grad_fn`) and the tensors it came
 from (`parents`), which is exactly the graph the backward pass will walk.
+
+Every tensor carries a unique `id`, so a tensor used more than once is recognisable as the *same*
+node: `Tensor#1` above appears twice, as a parent of both `Add` and `Multiply`. That is precisely
+the case where the backward pass will have to **accumulate** gradients instead of overwriting them.
+Pass `show_data=False` (the default) for a compact tree without the values.
 
 > On Windows, `print_graph` uses box-drawing characters that the default `cp1252` console cannot
 > encode. Run it with `PYTHONIOENCODING=utf-8 python main.py` (or `chcp 65001`) to see the tree.
@@ -58,9 +64,9 @@ from (`parents`), which is exactly the graph the backward pass will walk.
 
 | Concept | File | Description |
 | --- | --- | --- |
-| `Tensor` | [core/tensor.py](core/tensor.py) | Holds nested-list data, infers its `shape`, tracks `grad`, `grad_fn` and `parents`. |
+| `Tensor` | [core/tensor.py](core/tensor.py) | Holds nested-list data, infers its `shape`, gets a unique `id`, and tracks `grad`, `grad_fn` and `parents`. |
 | `Operation` | [autograd/operation.py](autograd/operation.py) | Base class for every differentiable op: `forward`, `backward`, `save_for_backward`, `validate_shape` and `create_tensor` (which wires the graph). |
-| `AutogradEngine` | [autograd/engine.py](autograd/engine.py) | Traverses the graph. `print_graph` renders it as a tree; `backward` is not implemented yet. |
+| `AutogradEngine` | [autograd/engine.py](autograd/engine.py) | Traverses the graph. `print_graph(tensor, show_data=False)` renders it as a tree; `backward` is not implemented yet. |
 | `Module` | [core/module.py](core/module.py) | Base class for layers, exposes `parameters()`. |
 | `Parameter` | [core/parameter.py](core/parameter.py) | A trainable value with its own `grad` and `requires_grad`. |
 
@@ -104,10 +110,8 @@ operate on plain Python lists. Migrating them to `Tensor` is part of the roadmap
 
 ## Roadmap
 
-- [x] `Tensor` with shape inference and graph metadata
-- [x] `Operation` base class with shared graph wiring
-- [x] Forward pass for `Add`, `Multiply` and `Dot`
-- [x] Graph visualisation via `AutogradEngine.print_graph`
+What is already done lives in the [changelog](CHANGELOG.md). What is left:
+
 - [ ] Backward pass (`AutogradEngine.backward` + `backward` on each operation)
 - [ ] Operator overloading on `Tensor` (`+`, `*`, `@`)
 - [ ] `MatMul` and activations (`ReLU`, `Sigmoid`)

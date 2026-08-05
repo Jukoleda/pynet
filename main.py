@@ -73,5 +73,5 @@ c = Add().forward(a, b)
 
 d = Multiply().forward(c, b)
 
-AutogradEngine().print_graph(d)
+AutogradEngine().print_graph(d, show_data=True)
 
